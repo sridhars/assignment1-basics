@@ -7,6 +7,10 @@
       "other": "off"
     },
     "editor.suggestOnTriggerCharacters": false,
-    "editor.inlineSuggest.enabled": false
+    "editor.inlineSuggest.enabled": false,
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": false,
+    "editor.formatOnSave": false
   }
 }
