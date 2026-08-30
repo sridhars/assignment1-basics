@@ -69,12 +69,15 @@ def train_bpe_chunk(start: int, end: int, input_path, special_escape_tokens: lis
 
 
 def train_bpe(input_path: str, vocab_size: int, special_tokens: list[str]):
-    # with open("../data/TinyStoriesV2-GPT4-train.txt", "rb") as f:
+    vocab: dict[int, bytes] = { i:bytes([i]) for i in range(256)}
+    eot_string = "<|endoftext|>"
+    eot_token = eot_string.encode('utf-8')
+    for token in special_tokens:
+        vocab[len(vocab)] = token.encode('utf-8')
     with open(input_path, "rb") as f:
-        eot_token = b"<|endoftext|>"
         num_processes = 4
         boundaries = find_chunk_boundaries(f, num_processes, eot_token)
-        special_escape_tokens = list(map(lambda x: re.escape(x), special_tokens + [eot_token.decode("utf-8")]))
+        special_escape_tokens = list(map(lambda x: re.escape(x), special_tokens + [eot_string]))
 
         # The following is a serial implementation, but you can parallelize this
         # by sending each start/end pair to a set of processes.
@@ -88,6 +91,27 @@ def train_bpe(input_path: str, vocab_size: int, special_tokens: list[str]):
 
             pretoken_counts = reduce(lambda x, y: x + y, counters)
             print(pretoken_counts.most_common(5))
+    merges: list[tuple[bytes, bytes]] = []
+    while len(vocab) < vocab_size:
+        print(len(vocab))
+        pairs_count = Counter()
+        for token_tuple, count in pretoken_counts.items():
+            for i in range(len(token_tuple) - 1):
+                pairs_count[(token_tuple[i], token_tuple[i + 1])] += count
+        max_count = max(pairs_count.values())
+        candidate_pairs = [k for k, v in pairs_count.items() if v == max_count]
+        merge_pair = max(candidate_pairs)
+        merges.append(merge_pair)
+        vocab[len(vocab)] = b''.join(merge_pair)
+
+        keys = list(pretoken_counts.keys())
+        for token_tuple in keys:
+            for i in range(len(token_tuple) - 1):
+                if (token_tuple[i], token_tuple[i+1]) == merge_pair:
+                    pretoken_counts[token_tuple[:i] + (token_tuple[i] + token_tuple[i+1],) + token_tuple[i+1:]] = pretoken_counts[token_tuple]
+                    if token_tuple in pretoken_counts:
+                        del pretoken_counts[token_tuple]
+    return vocab, merges
 
 
 def main():

@@ -8,7 +8,7 @@
     },
     "editor.suggestOnTriggerCharacters": false,
     "editor.inlineSuggest.enabled": false,
-    "editor.tabSize": 2,
+    "editor.tabSize": 4,
     "editor.insertSpaces": true,
     "editor.detectIndentation": false,
     "editor.formatOnSave": false
