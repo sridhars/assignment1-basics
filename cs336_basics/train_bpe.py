@@ -72,7 +72,7 @@ def process_word(
     return new_word
 
 
-def train_bpe(input_path: str, vocab_size: int, special_tokens: list[str]):
+def train_bpe(input_path: str, vocab_size: int, special_tokens: list[str], num_processes: int = 4):
     vocab: dict[int, bytes] = {i: bytes([i]) for i in range(256)}
     eot_string = "<|endoftext|>"
     assert eot_string in special_tokens
@@ -80,7 +80,6 @@ def train_bpe(input_path: str, vocab_size: int, special_tokens: list[str]):
     for token in special_tokens:
         vocab[len(vocab)] = token.encode("utf-8")
     with open(input_path, "rb") as f:
-        num_processes = 4
         boundaries = find_chunk_boundaries(f, num_processes, eot_token)
         with ProcessPoolExecutor(max_workers=num_processes) as executor:
             futures = [
