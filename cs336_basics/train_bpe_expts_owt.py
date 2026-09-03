@@ -5,11 +5,14 @@ from cs336_basics.memorymonitor import PeakMemoryMonitor
 from cs336_basics.train_bpe import train_bpe
 
 
-def train_bpe_tinystories():
-    """Run the train_bpe_tinystories deliverable: train on the full TinyStories
-    dataset, vocab_size=10000, and serialize the result to disk."""
-    input_path = "./data/TinyStoriesV2-GPT4-train.txt"
-    vocab_size = 10000
+def train_bpe_expts_owt():
+    """Run the train_bpe_expts_owt deliverable: train on the full OpenWebText
+    dataset, vocab_size=32000, and serialize the result to disk.
+
+    Resource requirements per the assignment: <=12 hours, <=100 GB RAM.
+    """
+    input_path = "./data/owt_train.txt"
+    vocab_size = 32000
     special_tokens = ["<|endoftext|>"]
 
     with PeakMemoryMonitor() as monitor:
@@ -24,7 +27,7 @@ def train_bpe_tinystories():
     )
     print(f"longest token ({len(longest_token)} bytes): {longest_token!r}")
 
-    out_path = "./data/tinystories_bpe.pkl"
+    out_path = "./data/owt_bpe.pkl"
     with open(out_path, "wb") as f:
         pickle.dump({"vocab": vocab, "merges": merges}, f)
     print(f"saved vocab/merges to {out_path}")
@@ -33,7 +36,7 @@ def train_bpe_tinystories():
 
 
 def main():
-    train_bpe_tinystories()
+    train_bpe_expts_owt()
 
 
 if __name__ == "__main__":
